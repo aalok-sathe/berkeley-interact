@@ -56,7 +56,7 @@ def iparser(cp, gr, tokenize=True, kbest=1):
     log('---done--- starting up the parser JVM')
 
     # Convert args from a dict to the appropriate Java class
-    opts = getOpts(dictToArgs({{"gr":gr, "tokenize":tokenize, "kbest":kbest}}))
+    opts = getOpts(dictToArgs({"gr":gr, "tokenize":tokenize, "kbest":kbest}))
 
     # Load the grammar file and initialize the parser with our options
     log('loading the grammar %s' % gr)

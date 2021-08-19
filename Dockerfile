@@ -14,7 +14,7 @@ WORKDIR /app
 ADD . /app
 # ADD . /sentspace/
 
-RUN pip install JPype-0.5.4.2/
+RUN JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/" pip install JPype-0.5.4.2/
 RUN pip install -r ./requirements.txt
 
 # cleanup
@@ -23,4 +23,4 @@ RUN pip cache purge
 RUN apt clean && rm -rf /var/lib/apt/lists/*
 
 # RUN yarn install --production
-# ENTRYPOINT gunicorn flaskproj:app
+# ENTRYPOINT gunicorn interactive:app
