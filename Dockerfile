@@ -22,4 +22,4 @@ RUN pip cache purge
 RUN apt clean && rm -rf /var/lib/apt/lists/*
 
 # RUN yarn install --production
-# ENTRYPOINT gunicorn interactive:app
+ENTRYPOINT gunicorn interactive:app
