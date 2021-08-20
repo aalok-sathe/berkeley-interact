@@ -81,9 +81,10 @@ def iparser(cp, gr, registry=registry, tokenize=True, kbest=1):
         log('---done--- loading the grammar')
 
         # store the loaded parser in registry for future use
-        registry[cp, gr] = parser
+        registry[cp, gr] = parser, opts
 
-    def parse(sentence, parser=registry[cp, gr]):
+    parser, opts = registry[cp, gr]
+    def parse(sentence, parser=parser, opts=opts):
         out = StringIO()
         parseInput(parser, opts, inputFile=StringIO(sentence), outputFile=out)
         return out.getvalue()
