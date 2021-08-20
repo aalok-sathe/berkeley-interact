@@ -12,7 +12,6 @@ RUN apt install -y openjdk-8-jdk-headless openjdk-8-jre-headless
 
 WORKDIR /app
 ADD . /app
-# ADD . /sentspace/
 
 RUN JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/" pip install JPype-0.5.4.2/
 RUN pip install -r ./requirements.txt
