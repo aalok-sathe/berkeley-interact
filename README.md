@@ -4,7 +4,7 @@ Python module to run the (legacy) Berkeley PCFG Parser interactively using the
 [berkeleyinterface](https://github.com/btibs/berkeleyinterface) package wrapped using
 `Flask` to provide a server that can be queried using `GET` requests.
 
-## Usage
+## Usage: How to interact with it
 
 Send a GET request within your script, using `curl`, or a service such as 
 [`postman`](https://www.postman.com/downloads/?utm_source=postman-home).
@@ -27,7 +27,7 @@ Here is the server-side log:
 And here is the output received: `( (S (INTJ (UH Hello) (. !)) (NP (PRP I)) (VP (VBP am) (NP (DT a) (NN postman))) (. .)) )`
 
 
-To use a specific grammar (currently available: [GCG-15 (Nguyen, Schijndel, & Schuler, 2012)](https://aclanthology.org/C12-1130.pdf)), 
+To use a specific grammar (currently available: [GCG-15 (Nguyen, van Schijndel, & Schuler, 2012)](https://aclanthology.org/C12-1130.pdf)), 
 use the appropriate endpoint: `localhost:8000/fullberk`, or simply pass it as a parameter in your query (`NotImplemented`).
 E.g., 
 ```bash
@@ -39,9 +39,7 @@ curl --location --request GET 'localhost:8000/fullberk' \
 ```
 The request above produces the following response: ``.
 
-## Installation
-
-### Preferred way: Docker
+## Setup: How to get it up and running
 
 We highly recommend using a container to run the program.
 You may either use `docker` to [build an image](https://docs.docker.com/engine/reference/commandline/build/) 
@@ -57,5 +55,9 @@ Here's an example using `docker`:
 sudo docker run -it --net=host --expose 8000 -p 8000:8000 aloxatel/berkeleyparser:latest
 ```
 This command will create a container and spawn a server within the container, binding the port `8000`
-to the same port on the `host` machine.
+to the same port on the `host` machine. In case it doesn't recognize the entrypoint i.e., 
+does not spawn the server as anticipated, simply run:
+```bash
+gunicorn interactive:app
+```
 
