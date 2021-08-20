@@ -127,7 +127,7 @@ def startup(classpath):
     '''Start the JVM. This MUST be called before any other jpype functions!'''
     # regarding memory - YMMV; this worked for my setup
     # jpype.startJVM('/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/bin/java', "-Djava.class.path=%s" % classpath, "-Xmx8g")
-    return jpype.startJVM(jpype.getDefaultJVMPath(), "-Djava.class.path=%s" % classpath, "-Xmx7g")
+    return jpype.startJVM(jpype.getDefaultJVMPath(), "-Djava.class.path=%s" % classpath, "-Xmx8g")
 
 def dictToArgs(d):
     '''Convert a dict of options to a list of command-line-style args'''
