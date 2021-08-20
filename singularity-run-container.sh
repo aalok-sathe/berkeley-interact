@@ -1,2 +1,2 @@
 #!/bin/bash
-singularity shell docker://aloxatel/berkeleyparser:latest
+singularity run --no-home docker://aloxatel/berkeleyparser:latest
