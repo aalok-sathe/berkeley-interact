@@ -21,12 +21,17 @@ User can enter utterances repeatedly and exit with ctrl-c
 ##########################################################################
 
 from __future__ import print_function
-from berkeleyinterface import *
-from StringIO import StringIO
+
+import os
+import pickle
 import sys
 from time import time
-from flask import Flask, Response, request, jsonify
-import pickle
+
+from flask import Flask, Response, jsonify, request
+from StringIO import StringIO
+
+from berkeleyinterface import (dictToArgs, getOpts, loadGrammar, parseInput,
+                               shutdown, startup)
 
 ##########################################################################
 ## Printing for sanity
@@ -35,7 +40,7 @@ import pickle
 START_TIME = time()
 def log(message, type='INFO'):
     timestamp = '%.2f' % (time() - START_TIME) 
-    print('='*8, type, '@', timestamp, file=sys.stderr, end=' ')
+    print('='*4, type, '@', timestamp, file=sys.stderr, end=' ')
     print(message, file=sys.stderr)
 
 
@@ -43,15 +48,20 @@ def log(message, type='INFO'):
 ## Main functionality
 ##########################################################################
 
-# Allow entering a number for kbest parses to show when running
-# kbest = 1
-# if len(sys.argv) > 1:
-#     kbest = int(sys.argv[1])
+# Always start the JVM first!
+log('attempting to start up the parser JVM using %s' % r'./bin/BerkeleyParser-1.7.jar')
+startup(r'./bin/BerkeleyParser-1.7.jar')
+log('---done--- starting up the parser JVM')
 
-
-# TODO: write registry to disk
+# TODO: write registry to disk somehow?
+# if os.path.exists('.cached_parsers.pkl'):
+#     log('found pickled parser registry on disk at `.cached_parsers.pkl`. attempting to load.')
+#     with open('.cached_parsers.pkl', 'rb') as f:
+#         registry = pickle.load(f)
+# else:
+#     log('no pickled parser registry on disk. initializing empty registry.')
 registry = {}
-def iparser(cp, gr, registry=registry, tokenize=True, kbest=1):
+def iparser(gr, registry=registry, tokenize=True, kbest=1):
     """returns a function for interactive parsing
 
     Args:
@@ -66,12 +76,7 @@ def iparser(cp, gr, registry=registry, tokenize=True, kbest=1):
                   using a parser loaded with the given options.
     """
 
-    if (cp, gr) not in registry:
-        # Always start the JVM first!
-        log('starting up the parser JVM using %s' % cp)
-        startup(cp)
-        log('---done--- starting up the parser JVM')
-
+    if gr not in registry:
         # Convert args from a dict to the appropriate Java class
         opts = getOpts(dictToArgs({"gr":gr, "tokenize":tokenize, "kbest":kbest}))
 
@@ -81,18 +86,25 @@ def iparser(cp, gr, registry=registry, tokenize=True, kbest=1):
         log('---done--- loading the grammar')
 
         # store the loaded parser in registry for future use
-        registry[cp, gr] = parser, opts
+        registry[gr] = parser, opts
 
-    parser, opts = registry[cp, gr]
-    def parse(sentence, parser=parser, opts=opts):
+        # log('dumping parser registry to disk at `.cached_parsers.pkl`.')
+        # with open('.cached_parsers.pkl', 'wb') as f:
+        #     pickle.dump(registry, f)
+
+    def parse(sentence, gr=gr):
+        parser, opts = registry[gr]
         out = StringIO()
         parseInput(parser, opts, inputFile=StringIO(sentence), outputFile=out)
         return out.getvalue()
-
     return parse
 
+# make phony calls to interactive parser method just to the grammars are preloaded into memory at startup
+for gr in [r'./bin/eng_sm6.gr',
+           r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model']:
+    _ = iparser(gr)
 
-
+# initialize the flask app
 app = Flask(__name__)
 
 @app.route('/')
@@ -103,7 +115,7 @@ def index():
 def default_parser():
     data = request.get_json()
     log('lightweight parser received sentence: ' + data['sentence'])
-    parse_method = iparser(r'./bin/BerkeleyParser-1.7.jar', r'./bin/eng_sm6.gr')
+    parse_method = iparser(r'./bin/eng_sm6.gr')
     parsed = parse_method(data['sentence'])
     log('---done--- lightweight parser produced the following tree: ' + parsed)
     return parsed
@@ -112,10 +124,11 @@ def default_parser():
 def fullberk_parser():
     data = request.get_json()
     log('GCG-15 parser received sentence: ' + data['sentence'])
-    parse_method = iparser(r'./bin/BerkeleyParser-1.7.jar', r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model')
+    parse_method = iparser(r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model')
     parsed = parse_method(data['sentence'])
     log('---done--- GCG-15 parser produced the following tree: ' + parsed)
     return parsed
+
 
 
 if __name__ == '__main__':
@@ -126,5 +139,5 @@ if __name__ == '__main__':
     # parser.add_argument('-p', '--port', type=int, help='Port for the server to run on', default=5000)
     # args = parser.parse_args()
 
-    log('Interactive Berkeley Parser starting server')
+    log('Interactive Berkeley Parser starting')
     app.run(debug=True, port=8000)
