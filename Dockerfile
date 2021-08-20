@@ -10,11 +10,17 @@ RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 RUN python2.7 get-pip.py
 # RUN apt install -y openjdk-8-jdk-headless openjdk-8-jre-headless
 
-WORKDIR /app
-ADD . /app
-
+WORKDIR /build
+COPY . /build
 RUN pip install JPype-0.5.4.2/
 RUN pip install -r ./requirements.txt
+RUN rm -rf /build
+
+WORKDIR /app
+ADD ./*.py /app/
+ADD ./*.sh /app/
+ADD ./bin/ /app/bin
+ADD ./README.md /app/
 
 # cleanup
 RUN apt autoremove -y
