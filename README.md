@@ -18,7 +18,7 @@ The request above returns a response containing the parse tree of the supplied s
 using the default English grammar distributed with the parser.
 ``
 
-To use a specific grammar (currently available: [GCG-15 (Nguyen, Schijndel, & Schuler, 2012)](https://aclanthology.org/C12-1130.pdf)), 
+To use a specific grammar (currently available: [GCG-15 (Nguyen, van Schijndel, & Schuler, 2012)](https://aclanthology.org/C12-1130.pdf)), 
 use the appropriate endpoint: `localhost:8000/fullberk`, or simply pass it as a parameter in your query (`NotImplemented`).
 E.g., 
 ```bash
