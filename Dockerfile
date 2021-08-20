@@ -27,5 +27,5 @@ RUN apt autoremove -y
 RUN pip cache purge
 RUN apt clean && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT bash
-#gunicorn interactive:app
+ENTRYPOINT /bin/bash -c 
+CMD java_home_export.sh && cd /app && gunicorn interactive:app -t 600
