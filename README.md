@@ -1,8 +1,9 @@
 # berkeley-interact
 
-Python module to run the (legacy) Berkeley PCFG Parser interactively using the 
-[berkeleyinterface](https://github.com/btibs/berkeleyinterface) package wrapped using
-`Flask` to provide a server that can be queried using `GET` requests.
+Python module to run the (legacy) Berkeley PCFG Parser as a server.
+We utilize the 
+[berkeleyinterface](https://github.com/btibs/berkeleyinterface) package and wrap
+it in a `Flask` app to provide a barebones server that can be queried using `GET` requests.
 
 ## Usage: How to interact with it
 
@@ -17,14 +18,16 @@ curl --location --request GET 'localhost:8000/default' \
 ```
 The request above returns a response containing the parse tree of the supplied sentence
 using the default English grammar distributed with the parser. 
-Here is the server-side log:
+Here is the server-side log (takes a bit longer on first request due to loading the grammar, but subsequent requests are executed rapidly):
 ```
-======== INFO @ 11.35 lightweight parser received sentence: Hello! I am a postman.
-======== INFO @ 11.45 loading the grammar ./bin/eng_sm6.gr
-======== INFO @ 21.27 ---done--- loading the grammar
-======== INFO @ 21.57 ---done--- lightweight parser produced the following tree: ( (S (INTJ (UH Hello) (. !)) (NP (PRP I)) (VP (VBP am) (NP (DT a) (NN postman))) (. .)) )
+==== INFO @ 0.00 attempting to start up the parser JVM using ./bin/BerkeleyParser-1.7.jar
+==== INFO @ 0.05 ---done--- starting up the parser JVM
+==== INFO @ 3.58 lightweight parser received sentence: This is an example sentence to be parsed.
+==== INFO @ 3.69 loading the grammar ./bin/eng_sm6.gr
+==== INFO @ 12.55 ---done--- loading the grammar
+==== INFO @ 12.87 ---done--- lightweight parser produced the following tree: ( (S (NP (DT This)) (VP (VBZ is) (NP (NP (DT an) (NN example) (NN sentence)) (SBAR (S (VP (TO to) (VP (VB be) (VP (VBN parsed)))))))) (. .)) )
 ```
-And here is the output received: `( (S (INTJ (UH Hello) (. !)) (NP (PRP I)) (VP (VBP am) (NP (DT a) (NN postman))) (. .)) )`
+And here is the output received over http: `( (S (NP (DT This)) (VP (VBZ is) (NP (NP (DT an) (NN example) (NN sentence)) (SBAR (S (VP (TO to) (VP (VB be) (VP (VBN parsed)))))))) (. .)) )`
 
 
 To use a specific grammar (currently available: [GCG-15 (Nguyen, van Schijndel, & Schuler, 2012)](https://aclanthology.org/C12-1130.pdf)), 
@@ -37,7 +40,10 @@ curl --location --request GET 'localhost:8000/fullberk' \
         "sentence": "This is an example sentence to be parsed."
      }'
 ```
-The request above produces the following response: ``.
+The request above produces the following server-side log (takes 5-8 min to load grammar on first run; subsequent requests are executed rapidly):
+```
+```
+And here's the output received over http: ``
 
 ## Setup: How to get it up and running
 
@@ -58,6 +64,7 @@ This command will create a container and spawn a server within the container, bi
 to the same port on the `host` machine. In case it doesn't recognize the entrypoint i.e., 
 does not spawn the server as anticipated, simply run:
 ```bash
-gunicorn interactive:app
+gunicorn interactive:app --timeout 600
 ```
-
+Make sure to allow sufficient `--timeout`, at least 600s (10 min), since it takes long to load the GCG-15 grammar on the first run.
+If your server times out despite this, try increasing the timeout in 120s increments.
