@@ -4,7 +4,7 @@ Python module to run the (legacy) Berkeley PCFG Parser interactively using the
 [berkeleyinterface](https://github.com/btibs/berkeleyinterface) package wrapped using
 `Flask` to provide a server that can be queried using `GET` requests.
 
-## Usage
+## Usage: How to interact with it
 
 Send a GET request within your script, using `curl`, or a service such as 
 [`postman`](https://www.postman.com/downloads/?utm_source=postman-home).
@@ -29,9 +29,7 @@ GET localhost:8000/fullberk
 ```
 The request above produces the following response: ``.
 
-## Installation
-
-### Preferred way: Docker
+## Setup: How to get it up and running
 
 We highly recommend using a container to run the program.
 You may either use `docker` to [build an image](https://docs.docker.com/engine/reference/commandline/build/) 
