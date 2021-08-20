@@ -82,7 +82,11 @@ def iparser(gr, registry=registry, tokenize=True, kbest=1):
 
         # Load the grammar file and initialize the parser with our options
         log('loading the grammar %s' % gr)
-        parser = loadGrammar(opts)
+        if grammar != r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model':
+            parser = loadGrammar(opts)
+        else:
+            parser = None
+            log('loading grammar temporarily DISABLED for %s' % gr)
         log('---done--- loading the grammar')
 
         # store the loaded parser in registry for future use
@@ -95,8 +99,10 @@ def iparser(gr, registry=registry, tokenize=True, kbest=1):
     def parse(sentence, gr=gr):
         parser, opts = registry[gr]
         out = StringIO()
-        parseInput(parser, opts, inputFile=StringIO(sentence), outputFile=out)
-        return out.getvalue()
+        if parser:
+            parseInput(parser, opts, inputFile=StringIO(sentence), outputFile=out)
+            return out.getvalue()
+        return 'NULL'
     return parse
 
 # make phony calls to interactive parser method just to the grammars are preloaded into memory at startup
