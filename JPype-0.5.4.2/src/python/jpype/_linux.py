@@ -34,7 +34,7 @@ JRE_ARCHS = [
 
 def getDefaultJVMPath() :
     java_home = os.getenv("JAVA_HOME") or '/usr/local/openjdk-18/'
-    return java_home + '/lib/server'
+    return java_home + '/lib/server/libjvm.so'
 
     jvm = _getJVMFromJavaHome()
     if jvm is not None :
