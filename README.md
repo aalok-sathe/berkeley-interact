@@ -9,23 +9,33 @@ Python module to run the (legacy) Berkeley PCFG Parser interactively using the
 Send a GET request within your script, using `curl`, or a service such as 
 [`postman`](https://www.postman.com/downloads/?utm_source=postman-home).
 ```bash
-GET localhost:8000/default 
-  {
-    "sentence": "This is an example sentence to be parsed"
-  }
+curl --location --request GET 'localhost:8000/default' \
+     --header 'Content-Type: application/json' \
+     --data-raw '{
+        "sentence": "This is an example sentence to be parsed."
+     }'
 ```
 The request above returns a response containing the parse tree of the supplied sentence
-using the default English grammar distributed with the parser.
-``
+using the default English grammar distributed with the parser. 
+Here is the server-side log:
+```
+======== INFO @ 11.35 lightweight parser received sentence: Hello! I am a postman.
+======== INFO @ 11.45 loading the grammar ./bin/eng_sm6.gr
+======== INFO @ 21.27 ---done--- loading the grammar
+======== INFO @ 21.57 ---done--- lightweight parser produced the following tree: ( (S (INTJ (UH Hello) (. !)) (NP (PRP I)) (VP (VBP am) (NP (DT a) (NN postman))) (. .)) )
+```
+And here is the output received: `( (S (INTJ (UH Hello) (. !)) (NP (PRP I)) (VP (VBP am) (NP (DT a) (NN postman))) (. .)) )`
+
 
 To use a specific grammar (currently available: [GCG-15 (Nguyen, Schijndel, & Schuler, 2012)](https://aclanthology.org/C12-1130.pdf)), 
 use the appropriate endpoint: `localhost:8000/fullberk`, or simply pass it as a parameter in your query (`NotImplemented`).
 E.g., 
 ```bash
-GET localhost:8000/fullberk 
-  {
-    "sentence": "This is an example sentence to be parsed"
-  }
+curl --location --request GET 'localhost:8000/fullberk' \
+     --header 'Content-Type: application/json' \
+     --data-raw '{
+        "sentence": "This is an example sentence to be parsed."
+     }'
 ```
 The request above produces the following response: ``.
 
