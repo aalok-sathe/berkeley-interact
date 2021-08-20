@@ -25,8 +25,8 @@ from berkeleyinterface import *
 from StringIO import StringIO
 import sys
 from time import time
-# from argparse import ArgumentParser
 from flask import Flask, Response, request, jsonify
+import pickle
 
 ##########################################################################
 ## Printing for sanity
@@ -48,97 +48,82 @@ def log(message, type='INFO'):
 # if len(sys.argv) > 1:
 #     kbest = int(sys.argv[1])
 
-def iparser(cp, gr, tokenize=True, kbest=1):
 
-    # Always start the JVM first!
-    log('starting up the parser JVM using %s' % cp)
-    startup(cp)
-    log('---done--- starting up the parser JVM')
+# TODO: write registry to disk
+registry = {}
+def iparser(cp, gr, registry=registry, tokenize=True, kbest=1):
+    """returns a function for interactive parsing
 
-    # Convert args from a dict to the appropriate Java class
-    opts = getOpts(dictToArgs({"gr":gr, "tokenize":tokenize, "kbest":kbest}))
+    Args:
+        cp (str): path to BerkeleyParser jar file
+        gr (str): path to grammar file for parsing
+        registry (dict): a dictionary mapping parser identifier to a loaded instance
+        tokenize (bool, optional): whether to tokenize input. Defaults to True.
+        kbest (int, optional): refer to Berkeley Parser documentation. Defaults to 1.
 
-    # Load the grammar file and initialize the parser with our options
-    log('loading the grammar %s' % gr)
-    parser = loadGrammar(opts)
-    log('---done--- loading the grammar')
+    Returns:
+        function: a `parse` function that accepts a sentence and returns parse tree
+                  using a parser loaded with the given options.
+    """
 
-    def parse(sentence):
+    if (cp, gr) not in registry:
+        # Always start the JVM first!
+        log('starting up the parser JVM using %s' % cp)
+        startup(cp)
+        log('---done--- starting up the parser JVM')
+
+        # Convert args from a dict to the appropriate Java class
+        opts = getOpts(dictToArgs({"gr":gr, "tokenize":tokenize, "kbest":kbest}))
+
+        # Load the grammar file and initialize the parser with our options
+        log('loading the grammar %s' % gr)
+        parser = loadGrammar(opts)
+        log('---done--- loading the grammar')
+
+        # store the loaded parser in registry for future use
+        registry[cp, gr] = parser
+
+    def parse(sentence, parser=registry[cp, gr]):
         out = StringIO()
         parseInput(parser, opts, inputFile=StringIO(sentence), outputFile=out)
-        return str(out)
+        return out.getvalue()
 
     return parse
 
-    # Now, run the parser
-    print("Enter your input below")
-    while True:
-        try:
-            # User can type into the console and the parse will be written to stdout
-            strIn = StringIO(raw_input(" > ")) # yes, this is still 2.7...
-            strOut = StringIO()
-            parseInput(parser, opts, inputFile=strIn, outputFile=strOut)
-            print( strOut.getvalue())
-        except EOFError:
-            print("\n\nGoodbye. </3")
-            break
-
-    # That's all, folks!
-    shutdown()
 
 
 app = Flask(__name__)
-registry = {# 'default': iparser(r'./BerkeleyParser-1.7.jar', r'./eng_sm6.gr'),
-            # 'fullberk': iparser(r'./BerkeleyParser-1.7.jar', r'./wsj02to21.gcg15.prtrm.4sm.fullberk.model'),
-           }
 
 @app.route('/')
 def index():
     return Response("hello, world!"), 200
 
-
-@app.route('/default', methods=['GET', 'POST'])
+@app.route('/default', methods=['GET'])
 def default_parser():
     data = request.get_json()
-    
-    if 'default' not in registry:
-        registry['default'] = iparser(r'./BerkeleyParser-1.7.jar', r'./eng_sm6.gr')
-    
-    return registry['default'](sentence=data['sentence'])
+    log('lightweight parser received sentence: ' + data['sentence'])
+    parse_method = iparser(r'./bin/BerkeleyParser-1.7.jar', r'./bin/eng_sm6.gr')
+    parsed = parse_method(data['sentence'])
+    log('---done--- lightweight parser produced the following tree: ' + parsed)
+    return parsed
 
-
-@app.route('/fullberk')
+@app.route('/fullberk', methods=['GET'])
 def fullberk_parser():
-    
-    if 'fullberk' not in registry:
-        registry['fullberk'] = iparser(r'./BerkeleyParser-1.7.jar', r'./wsj02to21.gcg15.prtrm.4sm.fullberk.model')
-
-    return registry['default'](sentence=data['sentence'])
+    data = request.get_json()
+    log('GCG-15 parser received sentence: ' + data['sentence'])
+    parse_method = iparser(r'./bin/BerkeleyParser-1.7.jar', r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model')
+    parsed = parse_method(data['sentence'])
+    log('---done--- GCG-15 parser produced the following tree: ' + parsed)
+    return parsed
 
 
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser('berkeleyinteract')
-
 
     # parser.add_argument('-cp', '--parser', type=str, help='Path to Berkeley Parser', default=r'./BerkeleyParser-1.7.jar')
     # parser.add_argument('-gr', '--grammar', type=str, help='Path to Berkeley Parser', default=r'./eng_sm6.gr')
     # parser.add_argument('-p', '--port', type=int, help='Port for the server to run on', default=5000)
     # args = parser.parse_args()
 
-    # log('Interactive Berkeley Parser received the following arguments: %s' % str(args))
-
-    # This should be the path to the Berkeley Parser jar file
-    # cp = r'C:\berkeleyparser\BerkeleyParser-1.7.jar'
-    # cp = r'/home/asathe/code/berkeleyinterface/berkeleyParser.jar'
-    # Set input arguments
-    # See the BerkeleyParser documentation for information on arguments
-    # gr = r'./wsj02to21.gcg15.prtrm.4sm.fullberk.model'
-    # gr = r'/home/asathe/code/berkeleyinterface/eng_sm6.gr'
-
-
-
-    # @app.route('/')
-    # def custom_parser():
-    #     iparser(cp=args.parser, gr=args.grammar)
-    
+    log('Interactive Berkeley Parser starting server')
     app.run(debug=True, port=8000)
