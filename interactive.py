@@ -82,7 +82,7 @@ def iparser(gr, registry=registry, tokenize=True, kbest=1):
 
         # Load the grammar file and initialize the parser with our options
         log('loading the grammar %s' % gr)
-        if grammar != r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model':
+        if gr != r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model':
             parser = loadGrammar(opts)
         else:
             parser = None
