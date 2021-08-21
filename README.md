@@ -20,7 +20,6 @@ The request above returns a response containing the parse tree of the supplied s
 using the default English grammar distributed with the parser. 
 Here is the server-side log (takes a bit longer on first request due to loading the grammar, but subsequent requests are executed rapidly):
 ```
-==== INFO @ 0.00 attempting to start up the parser JVM using ./bin/BerkeleyParser-1.7.jar
 ==== INFO @ 0.05 ---done--- starting up the parser JVM
 ==== INFO @ 3.58 lightweight parser received sentence: This is an example sentence to be parsed.
 ==== INFO @ 3.69 loading the grammar ./bin/eng_sm6.gr
@@ -40,10 +39,14 @@ curl --location --request GET 'localhost:8000/fullberk' \
         "sentence": "This is an example sentence to be parsed."
      }'
 ```
-The request above produces the following server-side log (takes 5-8 min to load grammar on first run; subsequent requests are executed rapidly):
+The request above produces the following server-side log (takes ~15 min to load grammar on first run; subsequent requests are executed rapidly):
 ```
+==== INFO @ 9.22 loading the grammar ./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model
+==== INFO @ 855.17 ---done--- loading the grammar
+==== INFO @ 1697.25 GCG-15 parser received sentence: This is an example sentence to be parsed.
+==== INFO @ 1697.45 ---done--- GCG-15 parser produced the following tree: ( (S+lS (S (N+lA (N+PRTRM This)) (V+aN (V+aN+b{A+aN}+PRTRM is) (A+aN+lA (N (N+b{N+aD}+PRTRM an) (N+aD+lA (A+aN+x+lM (N+aD+PRTRM example)) (N+aD+PRTRM sentence))) (I+aN+lM (I+aN+b{B+aN}+PRTRM to) (B+aN+lA (B+aN+b{A+aN}+PRTRM be) (A+aN+lA (L+aN+bN+PRTRM parsed))))))) (.+lM (.+PRTRM .))) )
 ```
-And here's the output received over http: ``
+And here's the output received over http: `( (S+lS (S (N+lA (N+PRTRM This)) (V+aN (V+aN+b{A+aN}+PRTRM is) (A+aN+lA (N (N+b{N+aD}+PRTRM an) (N+aD+lA (A+aN+x+lM (N+aD+PRTRM example)) (N+aD+PRTRM sentence))) (I+aN+lM (I+aN+b{B+aN}+PRTRM to) (B+aN+lA (B+aN+b{A+aN}+PRTRM be) (A+aN+lA (L+aN+bN+PRTRM parsed))))))) (.+lM (.+PRTRM .))) )`
 
 ## Setup: How to get it up and running
 
@@ -69,7 +72,7 @@ to the same port on the `host` machine. In case it doesn't recognize the entrypo
 does not spawn the server as anticipated, simply run:
 ```bash
 cd /app
-JAVA_HOME=/usr/local/openjdk-18 gunicorn interactive:app --timeout 600
+JAVA_HOME=/usr/local/openjdk-18 gunicorn interactive:app --timeout 1000
 ```
-Make sure to allow sufficient `--timeout`, at least 600s (10 min), since it takes long to load the GCG-15 grammar on the first run.
+Make sure to allow sufficient `--timeout`, at least 900s (15 min), since it takes long to load the GCG-15 grammar on the first run.
 If your server times out despite this, try increasing the timeout in 120s increments.
