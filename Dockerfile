@@ -11,8 +11,9 @@ RUN python2.7 get-pip.py
 # RUN apt install -y openjdk-8-jdk-headless openjdk-8-jre-headless
 
 WORKDIR /build
-COPY . /build
+COPY ./JPype-0.5.4.2/ /build/JPype-0.5.4.2
 RUN pip install JPype-0.5.4.2/
+COPY ./requirements.txt /build/
 RUN pip install -r ./requirements.txt
 RUN rm -rf /build
 
@@ -27,5 +28,5 @@ RUN apt autoremove -y
 RUN pip cache purge
 RUN apt clean && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT /bin/bash -c 
+ENTRYPOINT /bin/bash  
 CMD java_home_export.sh && cd /app && gunicorn interactive:app -t 1000
