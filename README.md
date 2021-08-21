@@ -75,4 +75,4 @@ cd /app
 JAVA_HOME=/usr/local/openjdk-18 gunicorn interactive:app --timeout 1000
 ```
 Make sure to allow sufficient `--timeout`, at least 900s (15 min), since it takes long to load the GCG-15 grammar on the first run.
-If your server times out despite this, try increasing the timeout in 120s increments.
+If your server times out despite this, try increasing the timeout in 300s (5 min) increments.
