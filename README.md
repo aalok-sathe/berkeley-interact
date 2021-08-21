@@ -62,13 +62,14 @@ sudo docker run -it --net=host --expose 8000 -p 8000:8000 aloxatel/berkeleyparse
 ```
 Here's an example using `singularity`:
 ```bash
-singularity shell aloxatel/berkeleyparser:latest
+singularity exec docker://aloxatel/berkeleyparser:latest /bin/bash -c "JAVA_HOME=/usr/local/openjdk-18 gunicorn interactive:app -t 1000"
 ```
 This command will create a container and spawn a server within the container, binding the port `8000`
 to the same port on the `host` machine. In case it doesn't recognize the entrypoint i.e., 
 does not spawn the server as anticipated, simply run:
 ```bash
-gunicorn interactive:app --timeout 600
+cd /app
+JAVA_HOME=/usr/local/openjdk-18 gunicorn interactive:app --timeout 600
 ```
 Make sure to allow sufficient `--timeout`, at least 600s (10 min), since it takes long to load the GCG-15 grammar on the first run.
 If your server times out despite this, try increasing the timeout in 120s increments.
