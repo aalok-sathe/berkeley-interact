@@ -48,64 +48,15 @@ def log(message, type='INFO'):
 ## Main functionality
 ##########################################################################
 
+# initialize the flask app
+app = Flask(__name__)
+
 # Always start the JVM first!
 log('attempting to start up the parser JVM using %s' % r'./bin/BerkeleyParser-1.7.jar')
 startup(r'./bin/BerkeleyParser-1.7.jar')
 log('---done--- starting up the parser JVM')
 
-# TODO: write registry to disk somehow?
-# if os.path.exists('.cached_parsers.pkl'):
-#     log('found pickled parser registry on disk at `.cached_parsers.pkl`. attempting to load.')
-#     with open('.cached_parsers.pkl', 'rb') as f:
-#         registry = pickle.load(f)
-# else:
-#     log('no pickled parser registry on disk. initializing empty registry.')
-registry = {}
-def iparser(gr, registry=registry, tokenize=True, kbest=1):
-    """returns a function for interactive parsing
 
-    Args:
-        cp (str): path to BerkeleyParser jar file
-        gr (str): path to grammar file for parsing
-        registry (dict): a dictionary mapping parser identifier to a loaded instance
-        tokenize (bool, optional): whether to tokenize input. Defaults to True.
-        kbest (int, optional): refer to Berkeley Parser documentation. Defaults to 1.
-
-    Returns:
-        function: a `parse` function that accepts a sentence and returns parse tree
-                  using a parser loaded with the given options.
-    """
-
-    if gr not in registry:
-        # Convert args from a dict to the appropriate Java class
-        opts = getOpts(dictToArgs({"gr":gr, "tokenize":tokenize, "kbest":kbest}))
-
-        # Load the grammar file and initialize the parser with our options
-        log('loading the grammar %s' % gr)
-        parser = loadGrammar(opts)
-        log('---done--- loading the grammar')
-
-        # store the loaded parser in registry for future use
-        registry[gr] = parser, opts
-
-        # log('dumping parser registry to disk at `.cached_parsers.pkl`.')
-        # with open('.cached_parsers.pkl', 'wb') as f:
-        #     pickle.dump(registry, f)
-
-    def parse(sentence, gr=gr):
-        parser, opts = registry[gr]
-        out = StringIO()
-        parseInput(parser, opts, inputFile=StringIO(sentence), outputFile=out)
-        return out.getvalue()
-    return parse
-
-# make phony calls to interactive parser method just to the grammars are preloaded into memory at startup
-for gr in [r'./bin/eng_sm6.gr',
-           r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model']:
-    _ = iparser(gr)
-
-# initialize the flask app
-app = Flask(__name__)
 
 @app.route('/')
 def index():
@@ -128,6 +79,62 @@ def fullberk_parser():
     parsed = parse_method(data['sentence'])
     log('---done--- GCG-15 parser produced the following tree: ' + parsed)
     return parsed
+
+
+# TODO: write registry to disk somehow?
+# if os.path.exists('.cached_parsers.pkl'):
+#     log('found pickled parser registry on disk at `.cached_parsers.pkl`. attempting to load.')
+#     with open('.cached_parsers.pkl', 'rb') as f:
+#         registry = pickle.load(f)
+# else:
+#     log('no pickled parser registry on disk. initializing empty registry.')
+registry = {}
+
+
+def iparser(gr, registry=registry, tokenize=True, kbest=1):
+    """returns a function for interactive parsing
+
+    Args:
+        cp (str): path to BerkeleyParser jar file
+        gr (str): path to grammar file for parsing
+        registry (dict): a dictionary mapping parser identifier to a loaded instance
+        tokenize (bool, optional): whether to tokenize input. Defaults to True.
+        kbest (int, optional): refer to Berkeley Parser documentation. Defaults to 1.
+
+    Returns:
+        function: a `parse` function that accepts a sentence and returns parse tree
+                  using a parser loaded with the given options.
+    """
+
+    if gr not in registry:
+        # Convert args from a dict to the appropriate Java class
+        opts = getOpts(dictToArgs({"gr": gr, "tokenize": tokenize, "kbest": kbest}))
+
+        # Load the grammar file and initialize the parser with our options
+        log('loading the grammar %s' % gr)
+        parser = loadGrammar(opts)
+        log('---done--- loading the grammar')
+
+        # store the loaded parser in registry for future use
+        registry[gr] = parser, opts
+
+        # log('dumping parser registry to disk at `.cached_parsers.pkl`.')
+        # with open('.cached_parsers.pkl', 'wb') as f:
+        #     pickle.dump(registry, f)
+
+    def parse(sentence, gr=gr):
+        parser, opts = registry[gr]
+        out = StringIO()
+        parseInput(parser, opts, inputFile=StringIO(sentence), outputFile=out)
+        return out.getvalue()
+    return parse
+
+
+# # make phony calls to interactive parser method just to the grammars are preloaded into memory at startup
+# for gr in [r'./bin/eng_sm6.gr',
+#            r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model']:
+#     _ = iparser(gr)
+
 
 
 
