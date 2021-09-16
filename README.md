@@ -56,9 +56,9 @@ using the `Dockerfile` in the repository:
 ```bash
 sudo docker build -t <your_preferred_image_name> .
 ```
-Or use a pre-built image from Docker hub, [`aloxatel/berkeleyparser`](https://hub.docker.com/repository/docker/aloxatel/berkeleyparser).
+Or use a pre-built image from Docker hub, [`aloxatel/berkeleyparser`](https://hub.docker.com/repository/docker/aloxatel/berkeleyparser) [![CircleCI](https://circleci.com/gh/aalok-sathe/berkeley-interact/tree/circle-ci.svg?style=svg)](https://circleci.com/gh/aalok-sathe/berkeley-interact/tree/circle-ci).
 
-Then run the image inside a container using your choice of a container daemon (e.g., `docker`, `singularity`).
+Then run the image inside a container using your choice of a container orchestrator (e.g., `docker`, `singularity`).
 Here's an example using `docker`:
 ```bash
 sudo docker run -it --net=host --expose 8000 -p 8000:8000 aloxatel/berkeleyparser:latest
