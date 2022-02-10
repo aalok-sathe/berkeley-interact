@@ -1,3 +1,4 @@
+.idea
 *.pyc
 JPype-0.5.4.2/test/
 .vscode/settings.json
