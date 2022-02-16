@@ -6,6 +6,7 @@ import time
 bind = '0.0.0.0:8000'
 workers = 4
 loglevel = "info"
+debug = False
 
 # Server Hooks
 def on_starting(server):
