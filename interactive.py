@@ -32,6 +32,7 @@ from StringIO import StringIO
 
 from berkeleyinterface import (dictToArgs, getOpts, loadGrammar, parseInput,
                                shutdown, startup)
+# from jpype.pickle import JPickler, JUnpickler
 
 ##########################################################################
 ## Printing for sanity
@@ -85,10 +86,11 @@ def fullberk_parser():
 # if os.path.exists('.cached_parsers.pkl'):
 #     log('found pickled parser registry on disk at `.cached_parsers.pkl`. attempting to load.')
 #     with open('.cached_parsers.pkl', 'rb') as f:
-#         registry = pickle.load(f)
+#         # try:
+#         registry = app.registry = JUnpickler(f).load()
 # else:
 #     log('no pickled parser registry on disk. initializing empty registry.')
-registry = {}
+registry = app.registry = {}
 
 
 def iparser(gr, registry=registry, tokenize=True, kbest=1):
@@ -116,11 +118,11 @@ def iparser(gr, registry=registry, tokenize=True, kbest=1):
         log('---done--- loading the grammar')
 
         # store the loaded parser in registry for future use
-        registry[gr] = parser, opts
+        app.registry[gr] = parser, opts
 
         # log('dumping parser registry to disk at `.cached_parsers.pkl`.')
         # with open('.cached_parsers.pkl', 'wb') as f:
-        #     pickle.dump(registry, f)
+        #     JPickler(f).dump(app.registry)
 
     def parse(sentence, gr=gr):
         parser, opts = registry[gr]
@@ -147,4 +149,4 @@ if __name__ == '__main__':
     # args = parser.parse_args()
 
     log('Interactive Berkeley Parser starting')
-    app.run(debug=True, port=8000)
+    app.run(debug=False, port=8000)
