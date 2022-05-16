@@ -65,7 +65,7 @@ def index():
 @app.route('/default', methods=['GET'])
 def default_parser():
     data = request.get_json()
-    log('lightweight parser received sentence: ' + data['sentence'])
+    log('lightweight parser received sentence: ' + data['sentence'].decode('utf-8', errors='ignore'))
     parse_method = iparser(r'./bin/eng_sm6.gr')
     parsed = parse_method(data['sentence'])
     log('---done--- lightweight parser produced the following tree: ' + parsed)
@@ -74,7 +74,7 @@ def default_parser():
 @app.route('/fullberk', methods=['GET'])
 def fullberk_parser():
     data = request.get_json()
-    log('GCG-15 parser received sentence: ' + data['sentence'])
+    log('GCG-15 parser received sentence: ' + data['sentence'].decode('utf-8', errors='ignore'))
     parse_method = iparser(r'./bin/wsj02to21.gcg15.prtrm.4sm.fullberk.model')
     parsed = parse_method(data['sentence'])
     log('---done--- GCG-15 parser produced the following tree: ' + parsed)

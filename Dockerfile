@@ -5,7 +5,7 @@ FROM openjdk:18-jdk-slim-buster
 RUN apt update
 RUN apt install -y g++
 RUN apt install -y python2.7 python2-dev libffi-dev
-RUN apt install -y curl
+RUN apt install -y curl git
 RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 RUN python2.7 get-pip.py
 # RUN apt install -y openjdk-8-jdk-headless openjdk-8-jre-headless
@@ -22,6 +22,11 @@ ADD ./*.py /app/
 ADD ./*.sh /app/
 ADD ./bin/ /app/bin
 ADD ./README.md /app/
+
+RUN git clone --depth 1 --branch 2.6.0 https://github.com/dmtcp/dmtcp
+RUN cd /app/dmtcp
+RUN ./configure && make && make install
+RUN cd /app
 
 # cleanup
 RUN apt autoremove -y
