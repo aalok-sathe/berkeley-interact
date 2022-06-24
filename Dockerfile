@@ -33,5 +33,7 @@ RUN apt autoremove -y
 RUN pip cache purge
 RUN apt clean && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT /bin/bash  
-CMD java_home_export.sh && cd /app && gunicorn interactive:app -t 1000
+ENV JAVA_HOME=/usr/local/openjdk-18
+
+ENTRYPOINT gunicorn interactive:app --preload --config gunicorn_config.py  
+CMD -t 10000
