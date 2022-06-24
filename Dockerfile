@@ -23,10 +23,10 @@ ADD ./*.sh /app/
 ADD ./bin/ /app/bin
 ADD ./README.md /app/
 
-RUN git clone --depth 1 --branch 2.6.0 https://github.com/dmtcp/dmtcp
-RUN cd /app/dmtcp
-RUN ./configure && make && make install
-RUN cd /app
+# RUN git clone --depth 1 --branch 2.6.0 https://github.com/dmtcp/dmtcp
+# RUN cd /app/dmtcp
+# RUN ./configure && make && make install
+# RUN cd /app
 
 # cleanup
 RUN apt autoremove -y
