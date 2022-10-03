@@ -5,7 +5,7 @@ FROM openjdk:18-jdk-slim-buster
 RUN apt update
 RUN apt install -y g++
 RUN apt install -y python2.7 python2-dev libffi-dev
-RUN apt install -y curl git
+RUN apt install -y curl # git
 RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 RUN python2.7 get-pip.py
 # RUN apt install -y openjdk-8-jdk-headless openjdk-8-jre-headless
