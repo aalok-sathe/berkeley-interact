@@ -1,4 +1,6 @@
 # berkeley-interact
+### ⚠ ARCHIVED: please use the up-to-date fork at https://github.com/sentspace/sentspace-syntax-server
+---
 
 Python module to run the (legacy) Berkeley PCFG Parser as a server.
 We utilize the 
